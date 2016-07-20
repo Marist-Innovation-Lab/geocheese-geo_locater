@@ -1,5 +1,5 @@
 import xml
-
+import backup_query as backup
 import geoip2.database
 import geocoder
 import re
@@ -125,4 +125,4 @@ def find_loc(mmdb_file, my_ip):
     return location_info
 
 #find_loc(raw_input("Target IP: "))
-
+#backup.query_(raw_input("Target IP: "))
