@@ -63,7 +63,7 @@ def find_loc(mmdb_file, my_ip):
     isp_asn =  re.findall('ASN:(\d+)ISP:', clean_isp_data2)
     isp_ip = re.findall('FALSEIP:(\d+.\d+.\d+.\d+)Decimal', clean_isp_data2)
 
-    if not isp_name or not isp_host or not isp_ip:
+    if not isp_name or not isp_host or not isp_asn or not isp_ip:
         isp_data2 = urlopen('http://ip-api.com/json/' + my_ip).read()
         isp_json = json.loads(isp_data2)
 
@@ -73,6 +73,8 @@ def find_loc(mmdb_file, my_ip):
         if not isp_host:
             isp_host = []
             isp_host.append("Unknown")
+        if not isp_asn:
+            isp_asn = re.findall('AS(\d+)\s', isp_json)
         if not isp_ip:
             isp_ip = []
             isp_ip.append(isp_json['query'])
