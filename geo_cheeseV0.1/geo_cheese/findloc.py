@@ -121,7 +121,11 @@ def find_loc(mmdb_file, my_ip):
         'host': to_string(isp_host[0]),
         'ip': to_string(isp_ip[0])
     }
-    
+
+    if location_info:
+        print("Successfully obtained GeoLocation Data")
+        print(location_info)
+
     return location_info
 
 #find_loc(raw_input("Target IP: "))

@@ -28,5 +28,8 @@ def query_(my_ip):
         'ip': to_string(isp_ip[0])
     }
 
-    print(isp_info2)
+    if isp_info2:
+        print("Backup Query Successfully retrieved GeoLocation Data")
+        print(isp_info2)
+
     return isp_info2
