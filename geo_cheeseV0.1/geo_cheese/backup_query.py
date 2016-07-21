@@ -14,13 +14,13 @@ def to_string(word):
 def query_(my_ip):
     #my_ip = urllib2.urlopen('http://ip.42.pl/raw').read()
 
-    isp_data2 = urllib2.Request('http://whatismyipaddress.com/ip/' + my_ip, headers={'User-Agent': 'Mozilla/5.0'})
-    clean_isp_data2 = urllib2.urlopen(isp_data2).read()
-    clean_isp_data2 = BeautifulSoup(clean_isp_data2).text
+    isp_data = urllib2.urlopen('https://www.whoismyisp.org/ip/' + my_ip).read()
+    clean_isp_data = BeautifulSoup(isp_data).text
+    # print(clean_isp_data)
 
-    isp_name = re.findall('ISP:(.*)Organization:', clean_isp_data2)
-    isp_host = re.findall('Hostname:(.*)ASN:', clean_isp_data2)
-    isp_ip = re.findall('FALSEIP:(\d+.\d+.\d+.\d+)Decimal', clean_isp_data2)
+    isp_name = re.findall('Who\sis\smy\sISP\?(.*)The\sInternet\s', clean_isp_data)
+    isp_host = re.findall('this\sIP\sis\'(.*)\'\.Other', clean_isp_data)
+    isp_ip = re.findall('IP\saddress\sis(\d+.\d+.\d+.\d+).\sThis', clean_isp_data)
 
     isp_info2 = {
         'name': to_string(isp_name[0]),
@@ -33,3 +33,5 @@ def query_(my_ip):
         print(isp_info2)
 
     return isp_info2
+
+#query_("114.149.196.91")
