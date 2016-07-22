@@ -32,6 +32,9 @@ def query_(my_ip):
         print("Backup Query Successfully retrieved GeoLocation Data")
         print(isp_info2)
 
+    else:
+        print("Backup Query Failed to retrieve GeoLocation Data")
+
     return isp_info2
 
 #query_("114.149.196.91")

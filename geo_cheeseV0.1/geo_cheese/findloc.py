@@ -60,21 +60,32 @@ def find_loc(mmdb_file, my_ip):
 
     isp_name = re.findall('ISP:(.*)Organization:', clean_isp_data2)
     isp_host = re.findall('Hostname:(.*)ASN:', clean_isp_data2)
-    isp_asn =  re.findall('ASN:(\d+)ISP:', clean_isp_data2)
+    isp_asn = re.findall('ASN:(\d+)ISP:', clean_isp_data2)
     isp_ip = re.findall('FALSEIP:(\d+.\d+.\d+.\d+)Decimal', clean_isp_data2)
 
     if not isp_name or not isp_host or not isp_asn or not isp_ip:
-        isp_data2 = urlopen('http://ip-api.com/json/' + my_ip).read()
+        isp_data3 = urllib2.urlopen('http://ipinfo.io/' + my_ip).read()
+        clean_isp_data3 = BeautifulSoup(isp_data3).text
+
+        if not isp_host:
+            isp_host = re.findall('Hostname(.*)Network', clean_isp_data3)
+        if not isp_asn:
+            isp_asn = re.findall('AS(\d+)\s', clean_isp_data3)
+        if not isp_name:
+            isp_name = re.findall('AS\d+(.*)City', clean_isp_data3)
+        if not isp_ip:
+            isp_ip = re.findall('html(\d+.\d+.\d+.\d+)\sIP', clean_isp_data3)
+
+    if not isp_name or not isp_asn or not isp_ip:
+        isp_data2 = urllib2.urlopen('http://ip-api.com/json/' + my_ip).read()
         isp_json = json.loads(isp_data2)
+        #print(isp_json)
 
         if not isp_name:
             isp_name = []
             isp_name.append(isp_json['isp'])
-        if not isp_host:
-            isp_host = []
-            isp_host.append("Unknown")
         if not isp_asn:
-            isp_asn = re.findall('AS(\d+)\s', isp_json)
+            isp_asn = re.findall('AS(\d+)\s', isp_json['as'])
         if not isp_ip:
             isp_ip = []
             isp_ip.append(isp_json['query'])
@@ -134,7 +145,10 @@ def find_loc(mmdb_file, my_ip):
         print("Successfully obtained GeoLocation Data")
         print(location_info)
 
+    else:
+        print("Failed to obtain GeoLocation Data")
+
     return location_info
 
-#find_loc("GeoLite2-City.mmdb", raw_input("Target IP: "))
+find_loc("GeoLite2-City.mmdb", raw_input("Target IP: "))
 #backup.query_(raw_input("Target IP: "))
