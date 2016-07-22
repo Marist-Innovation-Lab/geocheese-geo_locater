@@ -89,14 +89,21 @@ def find_loc(mmdb_file, my_ip):
             isp_ip = []
             isp_ip.append(isp_json['query'])
 
-    # Formats data into a more readable format
-    # location = "Country: " + to_string(country) + "\nSubdivision: " + to_string(subdivision) + "\nCity: " + to_string(city) + "\nPostal Code: " + to_string(zip)
-    # latlong = "Lat: " + str(lat) + ", Long: " + str(long)
-    # isp_info = "ISP Name: " + to_string(isp_name[0]) + "\nISP Host: " + to_string(isp_host[0]) + "\nISP IP: " + to_string(isp_ip[0])
+    # Backup Query in case data is still missing
+    if not isp_ip or not isp_host or not isp_name:
+        isp_info2 = backup.query_(my_ip)
 
-    # print(isp_info)
-    # print(location)
-    # print(latlong)
+        if not isp_ip:
+            isp_ip = []
+            isp_ip.append(isp_info2['ip'])
+        if not isp_host:
+            isp_host = []
+            isp_host.append(isp_info2['host'])
+        if not isp_name:
+            isp_name = []
+            isp_name.append(isp_info2['name'])
+
+    # Assigns default values in case data is found to be missing
     if not country:
         country = 'Unknown'
 
@@ -154,5 +161,4 @@ def find_loc(mmdb_file, my_ip):
 
     return location_info
 
-#find_loc("GeoLite2-City.mmdb", raw_input("Target IP: "))
-#backup.query_(raw_input("Target IP: "))
+#find_loc("GeoLite2-City.mmdb", '114.149.196.49')

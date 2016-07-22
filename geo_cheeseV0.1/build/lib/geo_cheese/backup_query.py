@@ -28,13 +28,6 @@ def query_(my_ip):
         'ip': to_string(isp_ip[0])
     }
 
-    if isp_info2:
-        print("Backup Query Successfully retrieved GeoISP Data")
-        print(isp_info2)
-
-    else:
-        print("Backup Query Failed to retrieve GeoISP Data")
-
     return isp_info2
 
 #query_("114.149.196.91")
