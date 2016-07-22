@@ -154,5 +154,5 @@ def find_loc(mmdb_file, my_ip):
 
     return location_info
 
-find_loc("GeoLite2-City.mmdb", raw_input("Target IP: "))
+#find_loc("GeoLite2-City.mmdb", raw_input("Target IP: "))
 #backup.query_(raw_input("Target IP: "))
