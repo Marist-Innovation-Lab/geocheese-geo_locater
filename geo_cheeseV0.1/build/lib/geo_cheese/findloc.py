@@ -16,7 +16,6 @@ def to_string(word):
     else:
         return str(word)
 
-
 # For removing HTML Tags for web scrape
 def remove_tags(text):
     return ''.join(xml.etree.ElementTree.fromstring(text).itertext())
@@ -142,13 +141,18 @@ def find_loc(mmdb_file, my_ip):
     }
 
     if location_info:
-        print("Successfully obtained GeoLocation Data")
-        print(location_info)
+        if 'Unknown' in location_info.values() or '0.0.0.0' in location_info.values():
+            print("Some Error Occured")
+            print("Incomplete GeoISP Data acquired")
+            print(location_info)
+        else:
+            print("Successfully obtained GeoISP Data")
+            print(location_info)
 
     else:
-        print("Failed to obtain GeoLocation Data")
+        print("Failed to obtain GeoISP Data")
 
     return location_info
 
-find_loc("GeoLite2-City.mmdb", raw_input("Target IP: "))
+#find_loc("GeoLite2-City.mmdb", raw_input("Target IP: "))
 #backup.query_(raw_input("Target IP: "))

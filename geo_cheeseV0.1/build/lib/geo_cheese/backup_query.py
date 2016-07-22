@@ -29,11 +29,11 @@ def query_(my_ip):
     }
 
     if isp_info2:
-        print("Backup Query Successfully retrieved GeoLocation Data")
+        print("Backup Query Successfully retrieved GeoISP Data")
         print(isp_info2)
 
     else:
-        print("Backup Query Failed to retrieve GeoLocation Data")
+        print("Backup Query Failed to retrieve GeoISP Data")
 
     return isp_info2
 
