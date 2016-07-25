@@ -1,5 +1,6 @@
 import xml
 import backup_query as backup
+import reverse_latlng_google as reverse_g
 import geoip2.database
 import geocoder
 import re
@@ -50,6 +51,15 @@ def find_loc(mmdb_file, my_ip):
         city = g.city
     if not zip:
         zip = g.postal
+
+    # In case array is still empty use online Google Maps API to retrieve all avaliable information
+    if not subdivision or not city or not zip:
+        back_geo = reverse_g.backup_latlng(lat, long)
+
+        if not city:
+            city = back_geo['city']
+        if not zip:
+            zip = back_geo['postal']
 
     # Get's ISP Information
     isp_data2 = urllib2.Request('http://whatismyipaddress.com/ip/' + my_ip, headers={'User-Agent': 'Mozilla/5.0'})
@@ -148,7 +158,7 @@ def find_loc(mmdb_file, my_ip):
     }
 
     if location_info:
-        if 'Unknown' in location_info.values() or '0.0.0.0' in location_info.values():
+        if 'Unknown' in location_info.values() or '0.0.0.0' in location_info.values() or '0000' in location_info.values():
             print("Some Error Occured")
             print("Incomplete GeoISP Data acquired")
             print(location_info)
@@ -161,4 +171,4 @@ def find_loc(mmdb_file, my_ip):
 
     return location_info
 
-#find_loc("GeoLite2-City.mmdb", '114.149.196.49')
+#find_loc("GeoLite2-City.mmdb", raw_input("Target IP: "))
