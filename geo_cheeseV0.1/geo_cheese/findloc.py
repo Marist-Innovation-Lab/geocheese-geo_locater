@@ -177,9 +177,23 @@ def find_loc(mmdb_file, my_ip):
         return location_info
 
     except:
+        location_info = {
+            'country': 'Unknown',
+            'subdivision': 'Unknown',
+            'city': 'Unknown',
+            'postal': '0000',
+            'lat': '0.000',
+            'long': '0.000',
+            'name': 'Unknown',
+            'ASN': '0000',
+            'host': 'Unknown',
+            'ip': '0.0.0.0'
+        }
+
         error = sys.exc_info()[0]
         print("IP Address is invalid " + my_ip)
         print("Error: " + str(error))
+        print location_info
 
 #find_loc("GeoLite2-City.mmdb", random_ip.rand_ip())
 #find_loc("GeoLite2-City.mmdb", '243.63.89.86') # Invalid IP for Testing
