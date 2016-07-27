@@ -1,7 +1,7 @@
 from random import randrange
 
 def rand_ip():
-    not_valid = [10, 127, 169, 172, 192]
+    not_valid = [10, 127, 169, 172, 192, 255]
 
     first = randrange(1, 256)
     while first in not_valid:
