@@ -23,7 +23,7 @@ def to_string(word):
 def remove_tags(text):
     return ''.join(xml.etree.ElementTree.fromstring(text).itertext())
 
-
+# Main function to retrieve GeoISP data about target IP address
 def find_loc(mmdb_file, my_ip):
     try:
         # Gets user's public IP address to be used by location services
