@@ -61,6 +61,8 @@ def find_loc(mmdb_file, my_ip):
 
             if not city:
                 city = back_geo['city']
+            if not subdivision:
+                subdivision = back_geo['sublocality']
             if not zip:
                 zip = back_geo['postal']
 
@@ -163,10 +165,10 @@ def find_loc(mmdb_file, my_ip):
         if location_info:
             if 'Unknown' in location_info.values() or '0.0.0.0' in location_info.values() or '0000' in location_info.values():
                 print("Data may not be avaliable or Error may have occured")
-                print("Incomplete GeoISP Data acquired")
+                print("Incomplete GeoISP Data acquired - " + my_ip)
                 print(location_info)
             else:
-                print("Successfully obtained GeoISP Data")
+                print("Successfully obtained GeoISP Data - " + my_ip)
                 print(location_info)
 
         else:
@@ -176,7 +178,7 @@ def find_loc(mmdb_file, my_ip):
 
     except:
         error = sys.exc_info()[0]
-        print("IP Address is invalid")
+        print("IP Address is invalid " + my_ip)
         print("Error: " + str(error))
 
 #find_loc("GeoLite2-City.mmdb", random_ip.rand_ip())

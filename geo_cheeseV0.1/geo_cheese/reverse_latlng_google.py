@@ -13,6 +13,7 @@ def to_string(word):
 def backup_latlng(lat, long):
     google_city = None
     google_postal = None
+    google_sublocality = None
     rev_latlng = urllib2.urlopen('http://maps.googleapis.com/maps/api/geocode/json?latlng=' + str(lat) + ',' + str(long) + '&sensor=true').read()
     latlng_json = json.loads(rev_latlng)
 
@@ -38,6 +39,22 @@ def backup_latlng(lat, long):
             else:
                 google_city = "Unknown"
 
+    sublocality_found = False
+    for results in latlng_json["results"]:
+        if sublocality_found:
+            break
+        for address in results["address_components"]:
+            if sublocality_found:
+                break
+            elif "sublocality_level_1" in address["types"]:
+                google_sublocality = address["long_name"]
+                sublocality_found = True
+            elif "sublocality_level_2" in address["types"]:
+                google_sublocality = address["long_name"]
+                sublocality_found = True
+            else:
+                google_sublocality = "Unknown"
+
     postal_found = False
     for results in latlng_json["results"]:
         if postal_found:
@@ -53,6 +70,7 @@ def backup_latlng(lat, long):
 
     google_info = {
         'city': to_string(google_city),
+        'sublocality': to_string(google_sublocality),
         'postal': to_string(google_postal)
     }
 
