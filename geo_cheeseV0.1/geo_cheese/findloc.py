@@ -26,97 +26,140 @@ def remove_tags(text):
 # Main function to retrieve GeoISP data about target IP address
 def find_loc(mmdb_file, my_ip):
     try:
-        # Gets user's public IP address to be used by location services
-        # my_ip = urlopen('http://ip.42.pl/raw').read()
+        try:
+            print("Retrieving basic geolocation data from GeoLite2-City.mmdb...")
+            # Gets user's public IP address to be used by location services
+            # my_ip = urlopen('http://ip.42.pl/raw').read()
 
-        # Creates a reader to parse through the database to get information on the IP provided
-        reader = geoip2.database.Reader(mmdb_file)
-        # Assigns the list of results to a variable to be printed out later.
-        response = reader.city(my_ip)
+            # Creates a reader to parse through the database to get information on the IP provided
+            reader = geoip2.database.Reader(mmdb_file)
+            # Assigns the list of results to a variable to be printed out later.
+            response = reader.city(my_ip)
 
-        # Individually assigns list elements to different variables for formatting
-        country = response.country.name
-        subdivision = response.subdivisions.most_specific.name
-        city = response.city.name
-        zip = response.postal.code
-        lat = response.location.latitude
-        long = response.location.longitude
+            # Individually assigns list elements to different variables for formatting
+            country = response.country.name
+            subdivision = response.subdivisions.most_specific.name
+            city = response.city.name
+            zip = response.postal.code
+            lat = response.location.latitude
+            long = response.location.longitude
 
-        # Close Database Connection
-        reader.close()
+            # Close Database Connection
+            reader.close()
+
+            print("Basic geolocation data retrieved from GeoLite2-City.mmdb...\n")
+        except:
+            print("Failed to retrieve data from GeoLite2-City.mmdb...\n")
 
         # In case array is empty do backup lookup via lat long
-        g = geocoder.google([lat, long], method='reverse')
+        if not subdivision or not city or not zip:
+            try:
+                print("Some geolocation data is still missing, running geocoder...")
+                g = geocoder.google([lat, long], method='reverse')
 
-        if not subdivision:
-            subdivision = g.state_long
-        if not city:
-            city = g.city
-        if not zip:
-            zip = g.postal
+                if not subdivision:
+                    subdivision = g.state_long
+                if not city:
+                    city = g.city
+                if not zip:
+                    zip = g.postal
+
+                print("Successfully retrieved missing geolocation data from geocoder...\n")
+            except:
+                print("Geocoder failed to properly retrieve data...\n")
 
         # In case array is still empty use online Google Maps API to retrieve all avaliable information
         if not subdivision or not city or not zip:
-            back_geo = reverse_g.backup_latlng(lat, long)
+            try:
+                print("Some geolocation data is still missing, querying Online Google Maps API...")
+                back_geo = reverse_g.backup_latlng(lat, long)
 
-            if not city:
-                city = back_geo['city']
-            if not subdivision:
-                subdivision = back_geo['sublocality']
-            if not zip:
-                zip = back_geo['postal']
+                if not city:
+                    city = back_geo['city']
+                if not subdivision:
+                    subdivision = back_geo['sublocality']
+                if not zip:
+                    zip = back_geo['postal']
+
+                print("Successfully retrieved missing geolocation data from Online Google Maps API...\n")
+            except:
+                print("Failure to open Google Maps API or connection rejected...\n")
 
         # Get's ISP Information
-        isp_data2 = urllib2.Request('http://whatismyipaddress.com/ip/' + my_ip, headers={'User-Agent': 'Mozilla/5.0'})
-        clean_isp_data2 = urllib2.urlopen(isp_data2).read()
-        clean_isp_data2 = BeautifulSoup(clean_isp_data2).text
-        #print(clean_isp_data2)
+        try:
+            print("Retrieving ISP Data...")
+            isp_data2 = urllib2.Request('http://whatismyipaddress.com/ip/' + my_ip, headers={'User-Agent': 'Mozilla/5.0'})
+            clean_isp_data2 = urllib2.urlopen(isp_data2).read()
+            clean_isp_data2 = BeautifulSoup(clean_isp_data2).text
+            #print(clean_isp_data2)
 
-        isp_name = re.findall('ISP:(.*)Organization:', clean_isp_data2)
-        isp_host = re.findall('Hostname:(.*)ASN:', clean_isp_data2)
-        isp_asn = re.findall('ASN:(\d+)ISP:', clean_isp_data2)
-        isp_ip = re.findall('FALSEIP:(\d+.\d+.\d+.\d+)Decimal', clean_isp_data2)
+            isp_name = re.findall('ISP:(.*)Organization:', clean_isp_data2)
+            isp_host = re.findall('Hostname:(.*)ASN:', clean_isp_data2)
+            isp_asn = re.findall('ASN:(\d+)ISP:', clean_isp_data2)
+            isp_ip = re.findall('FALSEIP:(\d+.\d+.\d+.\d+)Decimal', clean_isp_data2)
 
-        if not isp_name or not isp_host or not isp_asn or not isp_ip:
-            isp_data3 = urllib2.urlopen('http://ipinfo.io/' + my_ip).read()
-            clean_isp_data3 = BeautifulSoup(isp_data3).text
-
-            if not isp_host:
-                isp_host = re.findall('Hostname(.*)Network', clean_isp_data3)
-            if not isp_asn:
-                isp_asn = re.findall('AS(\d+)\s', clean_isp_data3)
-            if not isp_name:
-                isp_name = re.findall('AS\d+(.*)City', clean_isp_data3)
-            if not isp_ip:
-                isp_ip = re.findall('html(\d+.\d+.\d+.\d+)\sIP', clean_isp_data3)
-
-        if not isp_name or not isp_asn or not isp_ip:
-            isp_data2 = urllib2.urlopen('http://ip-api.com/json/' + my_ip).read()
-            isp_json = json.loads(isp_data2)
-            #print(isp_json)
-
-            if not isp_name:
-                isp_name = []
-                isp_name.append(isp_json['isp'])
-            if not isp_asn:
-                isp_asn = re.findall('AS(\d+)\s', isp_json['as'])
-            if not isp_ip:
-                isp_ip = []
-                isp_ip.append(isp_json['query'])
+            print("Successfully retrieved ISP data from WhatIsMyIPAddress...\n")
+        except:
+            print("Failure to open WhatIsMyIPAddress or connection rejected...\n")
 
         # Backup Query in case data is still missing
         if not isp_ip or not isp_host or not isp_name:
-            isp_info2 = backup.query_(my_ip)
+            try:
+                print("Some ISP data is missing, running backup query...")
+                isp_info2 = backup.query_(my_ip)
 
-            if not isp_ip:
-                isp_ip = []
-                isp_ip.append(isp_info2['ip'])
-            if not isp_host:
-                isp_host = []
-                isp_host.append(isp_info2['host'])
-            if not isp_name:
-                isp_name = []
-                isp_name.append(isp_info2['name'])
+                if not isp_ip:
+                    isp_ip = []
+                    isp_ip.append(isp_info2['ip'])
+                if not isp_host:
+                    isp_host = []
+                    isp_host.append(isp_info2['host'])
+                if not isp_name:
+                    isp_name = []
+                    isp_name.append(isp_info2['name'])
+
+                print("Backup query successfully retrieved missing ISP data...\n")
+            except:
+                print("Backup query failed to retrieve ISP data...\n")
+
+        if not isp_name or not isp_host or not isp_asn or not isp_ip:
+            try:
+                print("Some ISP data is missing, retrieving information from ipinfo.io...")
+                isp_data3 = urllib2.urlopen('http://ipinfo.io/' + my_ip).read()
+                clean_isp_data3 = BeautifulSoup(isp_data3).text
+
+                if not isp_host:
+                    isp_host = re.findall('Hostname(.*)Network', clean_isp_data3)
+                if not isp_asn:
+                    isp_asn = re.findall('AS(\d+)\s', clean_isp_data3)
+                if not isp_name:
+                    isp_name = re.findall('AS\d+(.*)City', clean_isp_data3)
+                if not isp_ip:
+                    isp_ip = re.findall('html(\d+.\d+.\d+.\d+)\sIP', clean_isp_data3)
+
+                print("Successfully retrieved ISP information from ipinfo.io...\n")
+            except:
+                print("Failure to open ipinfo.io or connection rejected...\n")
+
+        if not isp_name or not isp_asn or not isp_ip:
+            try:
+                print("Some ISP data is missing, retrieving information from ip-api.com...")
+                isp_data2 = urllib2.urlopen('http://ip-api.com/json/' + my_ip).read()
+                isp_json = json.loads(isp_data2)
+                #print(isp_json)
+
+                if not isp_name:
+                    isp_name = []
+                    isp_name.append(isp_json['isp'])
+                if not isp_asn:
+                    isp_asn = re.findall('AS(\d+)\s', isp_json['as'])
+                if not isp_ip:
+                    isp_ip = []
+                    isp_ip.append(isp_json['query'])
+
+                print("Successfully retrieved ISP information from ip-api.com...\n")
+            except:
+                print("Failure to open ip-api.com or connection rejected...\n")
 
         # Assigns default values in case data is found to be missing
         if not country:
