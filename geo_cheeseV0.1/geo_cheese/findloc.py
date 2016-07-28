@@ -128,7 +128,6 @@ def find_loc(mmdb_file, my_ip):
         try:
             print("Some ISP data is missing, running backup query...")
             isp_info2 = backup.query_(my_ip)
-            print("Querying local database for ISP ASN and Name...")
             isp_local_data = backup.get_asn(my_ip)
 
             if not isp_ip and isp_info2['ip'] != None:
@@ -143,6 +142,8 @@ def find_loc(mmdb_file, my_ip):
                 print("isp_name acquired from WhoIsMyISP...")
                 isp_name = []
                 isp_name.append(isp_info2['name'])
+
+            print("Querying local database for ISP ASN and Name...")
             try:
                 if not isp_asn and isp_local_data['isp_asn'] != None:
                     print("isp_asn acquired from local database...")
