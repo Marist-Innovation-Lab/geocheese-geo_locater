@@ -11,7 +11,6 @@ import sys
 from unidecode import unidecode
 from BeautifulSoup import BeautifulSoup
 
-
 # For filtering string of unicode, and prepare for printing
 def to_string(word):
     if isinstance(word, unicode) and word:
@@ -125,20 +124,36 @@ def find_loc(mmdb_file, my_ip):
         print("Failure to open WhatIsMyIPAddress or connection rejected...\n")
 
     # Backup Query in case data is still missing
-    if not isp_ip or not isp_host or not isp_name:
+    if not isp_ip or not isp_host or not isp_name or not isp_asn:
         try:
             print("Some ISP data is missing, running backup query...")
             isp_info2 = backup.query_(my_ip)
+            print("Querying local database for ISP ASN and Name...")
+            isp_local_data = backup.get_asn(my_ip)
 
-            if not isp_ip:
+            if not isp_ip and isp_info2['ip'] != None:
+                print("isp_ip acquired from WhoIsMyISP...")
                 isp_ip = []
                 isp_ip.append(isp_info2['ip'])
-            if not isp_host:
+            if not isp_host and isp_info2['host'] != None:
+                print("isp_host acquired from WhoIsMyISP...")
                 isp_host = []
                 isp_host.append(isp_info2['host'])
-            if not isp_name:
+            if not isp_name and isp_info2['name'] != None:
+                print("isp_name acquired from WhoIsMyISP...")
                 isp_name = []
                 isp_name.append(isp_info2['name'])
+            try:
+                if not isp_asn and isp_local_data['isp_asn'] != None:
+                    print("isp_asn acquired from local database...")
+                    isp_asn = []
+                    isp_asn.append(isp_local_data['isp_asn'])
+                if not isp_name and isp_local_data['isp_name'] != None:
+                    print("isp_name acquired from local database...")
+                    isp_name = []
+                    isp_name.append(isp_local_data['isp_name'])
+            except:
+                print("Local database failed to return values...")
 
             print("Backup query successfully retrieved missing ISP data...\n")
         except:
@@ -154,12 +169,19 @@ def find_loc(mmdb_file, my_ip):
 
             if not isp_host:
                 isp_host = re.findall('Hostname(.*)Network', clean_isp_data3)
+                print("isp_host acquired from ipinfo.io...")
             if not isp_asn:
                 isp_asn = re.findall('AS(\d+)\s', clean_isp_data3)
+                print("isp_asn acquired from ipinfo.io...")
+                if isp_asn[0] == "15169":
+                    print("Obtained default ASN value, removing now...")
+                    isp_asn = None
             if not isp_name:
                 isp_name = re.findall('AS\d+(.*)City', clean_isp_data3)
+                print("isp_name acquired from ipinfo.io...")
             if not isp_ip:
                 isp_ip = re.findall('html(\d+.\d+.\d+.\d+)\sIP', clean_isp_data3)
+                print("isp_ip acquired from ipinfo.io...")
 
             print("Successfully retrieved ISP information from ipinfo.io...\n")
         except:
@@ -177,11 +199,15 @@ def find_loc(mmdb_file, my_ip):
             if not isp_name:
                 isp_name = []
                 isp_name.append(isp_json['isp'])
+                print("isp_name acquired from ip-api.com...")
             if not isp_asn:
                 isp_asn = re.findall('AS(\d+)\s', isp_json['as'])
+                if isp_asn[0] != "0000":
+                    print("isp_asn acquired from ip-api.com...")
             if not isp_ip:
                 isp_ip = []
                 isp_ip.append(isp_json['query'])
+                print("isp_ip acquired from ip-api.com...")
 
             print("Successfully retrieved ISP information from ip-api.com...\n")
         except:
@@ -190,34 +216,34 @@ def find_loc(mmdb_file, my_ip):
             print("Failure to open ip-api.com or connection rejected...\n")
 
     # Assigns default values in case data is found to be missing
-    if not country:
+    if not country or country == None or country == "None":
         country = 'Unknown'
 
-    if not subdivision:
+    if not subdivision or subdivision == None or subdivision == "None":
         subdivision = 'Unknown'
 
-    if not city:
+    if not city or city == "None":
         city = 'Unknown'
 
-    if not zip:
+    if not zip or zip == "None":
         zip = '0000'
 
-    if not lat:
+    if not lat or lat == "None":
         lat = '0.000'
 
-    if not long:
+    if not long or long == "None":
         long = '0.000'
 
-    if not isp_name:
+    if not isp_name or isp_name[0]  == "None":
         isp_name = ['Unknown']
 
-    if not isp_host:
+    if not isp_host or isp_host[0] == "None":
         isp_host = ['Unknown']
 
-    if not isp_asn:
+    if not isp_asn or isp_asn[0] == "None":
         isp_asn = ['0000']
 
-    if not isp_ip:
+    if not isp_ip or isp_ip[0] == "None":
         isp_ip = ['0.0.0.0']
 
     location_info = {
@@ -234,7 +260,7 @@ def find_loc(mmdb_file, my_ip):
     }
 
     if location_info:
-        if 'Unknown' in location_info.values() or '0.0.0.0' in location_info.values() or '0000' in location_info.values():
+        if 'Unknown' in location_info.values() or '0.0.0.0' in location_info.values() or '0000' in location_info.values() or 'None' in location_info.values():
             print("Data may not be avaliable or Error may have occured")
             print("Incomplete GeoISP Data acquired - " + my_ip)
             print(location_info)
@@ -264,7 +290,10 @@ def find_loc(mmdb_file, my_ip):
 
     return location_info
 
-#for x in xrange(20):
-#    find_loc("GeoLite2-City.mmdb", random_ip.rand_ip())
+#for x in xrange(10):
 #    print(x + 1)
+#    find_loc("GeoLite2-City.mmdb", random_ip.rand_ip())
 #find_loc("GeoLite2-City.mmdb", '243.63.89.86') # Invalid IP for Testing
+find_loc("GeoLite2-City.mmdb", "90.37.92.95")
+#find_loc("GeoLite2-City.mmdb", random_ip.rand_ip())
+#get_asn("166.193.75.232")
