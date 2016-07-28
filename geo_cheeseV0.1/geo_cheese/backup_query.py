@@ -54,8 +54,8 @@ def get_asn(my_ip):
     try:
         # Initialize module and load IP to ASN database
         # the sample database can be downloaded or built - see below
-        asndb = pyasn.pyasn('ipasn_20140513.dat')
-        with open('asnames.json') as asn_host:
+        asndb = pyasn.pyasn('local_dbs/ipasn_20140513.dat')
+        with open('local_dbs/asnames.json') as asn_host:
             asn_name = json.load(asn_host)
 
         isp_asn = asndb.lookup(my_ip)[0]

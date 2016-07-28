@@ -292,8 +292,8 @@ def find_loc(mmdb_file, my_ip):
 
 #for x in xrange(10):
 #    print(x + 1)
-#    find_loc("GeoLite2-City.mmdb", random_ip.rand_ip())
-#find_loc("GeoLite2-City.mmdb", '243.63.89.86') # Invalid IP for Testing
-find_loc("GeoLite2-City.mmdb", "90.37.92.95")
-#find_loc("GeoLite2-City.mmdb", random_ip.rand_ip())
+#    find_loc("local_dbs/GeoLite2-City.mmdb", random_ip.rand_ip())
+#find_loc("local_dbs/GeoLite2-City.mmdb", '243.63.89.86') # Invalid IP for Testing
+#find_loc("local_dbs/GeoLite2-City.mmdb", "90.37.92.95")
+#find_loc("local_dbs/GeoLite2-City.mmdb", random_ip.rand_ip())
 #get_asn("166.193.75.232")
