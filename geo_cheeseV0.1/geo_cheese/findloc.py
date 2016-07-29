@@ -117,6 +117,15 @@ def find_loc(mmdb_file, my_ip):
         isp_asn = re.findall('ASN:(\d+)ISP:', clean_isp_data2)
         isp_ip = re.findall('FALSEIP:(\d+.\d+.\d+.\d+)Decimal', clean_isp_data2)
 
+        if isp_name:
+            print("isp_name acquired from WhatIsMyIPAddress...")
+        if isp_host:
+            print("isp_host acquired from WhatIsMyIPAddress...")
+        if isp_asn:
+            print("isp_asn acquired from WhatIsMyIPAddress...")
+        if isp_ip:
+            print("isp_ip acquired from WhatIsMyIPAddress...")
+
         print("Successfully retrieved ISP data from WhatIsMyIPAddress...\n")
     except:
         error = sys.exc_info()[0]
@@ -131,17 +140,20 @@ def find_loc(mmdb_file, my_ip):
             isp_local_data = backup.get_asn(my_ip)
 
             if not isp_ip and isp_info2['ip'] != None:
-                print("isp_ip acquired from WhoIsMyISP...")
                 isp_ip = []
                 isp_ip.append(isp_info2['ip'])
+                if isp_ip and isp_ip != []:
+                    print("isp_ip acquired from WhoIsMyISP...")
             if not isp_host and isp_info2['host'] != None:
-                print("isp_host acquired from WhoIsMyISP...")
                 isp_host = []
                 isp_host.append(isp_info2['host'])
+                if isp_host and isp_host != []:
+                    print("isp_host acquired from WhoIsMyISP...")
             if not isp_name and isp_info2['name'] != None:
-                print("isp_name acquired from WhoIsMyISP...")
                 isp_name = []
                 isp_name.append(isp_info2['name'])
+                if isp_name and isp_name != []:
+                    print("isp_name acquired from WhoIsMyISP...")
 
             print("Querying local database for ISP ASN and Name...")
             try:
@@ -165,24 +177,28 @@ def find_loc(mmdb_file, my_ip):
     if not isp_name or not isp_host or not isp_asn or not isp_ip:
         try:
             print("Some ISP data is missing, retrieving information from ipinfo.io...")
-            isp_data3 = urllib2.urlopen('http://ipinfo.io/' + my_ip).read()
-            clean_isp_data3 = BeautifulSoup(isp_data3).text
+            isp_data3 = urllib2.urlopen('http://ipinfo.io/' + str(my_ip) + '/json').read()
+            isp_data3_json = json.loads(isp_data3)
 
             if not isp_host:
-                isp_host = re.findall('Hostname(.*)Network', clean_isp_data3)
-                print("isp_host acquired from ipinfo.io...")
+                isp_host = []
+                if isp_data3_json['hostname'] != "No Hostname":
+                    isp_host.append(isp_data3_json['hostname'])
+                if isp_host and isp_host != []:
+                    print("isp_host acquired from ipinfo.io...")
             if not isp_asn:
-                isp_asn = re.findall('AS(\d+)\s', clean_isp_data3)
-                print("isp_asn acquired from ipinfo.io...")
-                if isp_asn[0] == "15169":
-                    print("Obtained default ASN value, removing now...")
-                    isp_asn = None
+                isp_asn = re.findall('AS(\d+)\s', isp_data3_json['org'])
+                if isp_asn and isp_asn != []:
+                    print("isp_asn acquired from ipinfo.io...")
             if not isp_name:
-                isp_name = re.findall('AS\d+(.*)City', clean_isp_data3)
-                print("isp_name acquired from ipinfo.io...")
+                isp_name = re.findall('AS\d+\s(.*)', isp_data3_json['org'])
+                if isp_name and isp_name != []:
+                    print("isp_name acquired from ipinfo.io...")
             if not isp_ip:
-                isp_ip = re.findall('html(\d+.\d+.\d+.\d+)\sIP', clean_isp_data3)
-                print("isp_ip acquired from ipinfo.io...")
+                isp_ip = []
+                isp_ip.append(isp_data3_json['ip'])
+                if isp_ip and isp_ip != []:
+                    print("isp_ip acquired from ipinfo.io...")
 
             print("Successfully retrieved ISP information from ipinfo.io...\n")
         except:
@@ -295,6 +311,6 @@ def find_loc(mmdb_file, my_ip):
 #    print(x + 1)
 #    find_loc("local_dbs/GeoLite2-City.mmdb", random_ip.rand_ip())
 #find_loc("local_dbs/GeoLite2-City.mmdb", '243.63.89.86') # Invalid IP for Testing
-#find_loc("local_dbs/GeoLite2-City.mmdb", "90.37.92.95")
+#find_loc("local_dbs/GeoLite2-City.mmdb", "176.245.154.188")
 #find_loc("local_dbs/GeoLite2-City.mmdb", random_ip.rand_ip())
 #get_asn("166.193.75.232")
