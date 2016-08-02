@@ -174,6 +174,61 @@ def find_loc(mmdb_file, my_ip):
             print("Error: " + str(error))
             print("Backup query failed to retrieve ISP data...\n")
 
+    if not subdivision or not city or not zip or not isp_asn or not isp_name or not isp_host or not isp_ip:
+        try:
+            print("Some GeoISP data is missing, retrieving information from api.moocher.io...")
+            isp_data4 = urllib2.urlopen('http://api.moocher.io/ip/' + str(my_ip)).read()
+            isp_data4_json = json.loads(isp_data4)
+
+            # Retrieve Geo Data from api.moocher.io
+            if not subdivision or not city or not zip:
+                print("\nSome Geo data is missing, attempting to acquire now...")
+            if not subdivision and isp_data4_json['ip']['region']:
+                subdivision = isp_data4_json['ip']['region']
+                print("subdivision acquired from api.moocher.io...")
+            if not city and isp_data4_json['ip']['city']:
+                city = isp_data4_json['ip']['city']
+                print("city acquired from api.moocher.io...")
+            if not zip and isp_data4_json['ip']['postal']:
+                zip = isp_data4_json['ip']['postal']
+                print("zip acquired from api.moocher.io...")
+
+            # Retrieve ISP Data from api.moocher.io
+            if not isp_asn or not isp_name or not isp_host or not isp_ip:
+                print("\nSome ISP data is missing, attempting to acquire now...")
+            if not isp_asn and isp_data4_json['ip']['as']['asn']:
+                isp_asn = []
+                isp_asn.append(isp_data4_json['ip']['as']['asn'])
+                print("isp_asn acquired from api.moocher.io...")
+            if not isp_name and isp_data4_json['ip']['as']['name']:
+                isp_name = []
+                isp_name.append(isp_data4_json['ip']['as']['name'])
+                print("isp_name acquired from api.moocher.io...")
+            if not isp_host and isp_data4_json['ip']['hostname']:
+                isp_host = []
+                isp_host.append(isp_data4_json['ip']['hostname'])
+                print("isp_host acquired from api.moocher.io...")
+            if not isp_ip and isp_data4_json['ip']['address']:
+                isp_ip = []
+                isp_ip.append(isp_data4_json['ip']['address'])
+                print("isp_ip acquired from api.moocher.io...")
+
+            isp_data4_dic = {
+                'subdivision': subdivision,
+                'city': city,
+                'postal': zip,
+                'ASN': isp_asn,
+                'name': isp_name,
+                'host': isp_host,
+                'ip': isp_ip
+            }
+            #print isp_data4_dic
+            print("Successfully acquired GeoISP Data from api.moocher.io...\n")
+        except:
+            error = sys.exc_info()[0]
+            print("Error: " + str(error))
+            print("Failure to open api.moocher.io or connection rejected...\n")
+
     if not isp_name or not isp_host or not isp_asn or not isp_ip:
         try:
             print("Some ISP data is missing, retrieving information from ipinfo.io...")
@@ -307,10 +362,10 @@ def find_loc(mmdb_file, my_ip):
 
     return location_info
 
-#for x in xrange(10):
+#for x in xrange(20):
 #    print(x + 1)
 #    find_loc("local_dbs/GeoLite2-City.mmdb", random_ip.rand_ip())
 #find_loc("local_dbs/GeoLite2-City.mmdb", '243.63.89.86') # Invalid IP for Testing
-#find_loc("local_dbs/GeoLite2-City.mmdb", "176.245.154.188")
+#find_loc("local_dbs/GeoLite2-City.mmdb", "148.100.219.37")
 #find_loc("local_dbs/GeoLite2-City.mmdb", random_ip.rand_ip())
 #get_asn("166.193.75.232")
