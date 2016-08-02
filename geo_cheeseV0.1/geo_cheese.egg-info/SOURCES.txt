@@ -4,7 +4,6 @@ geo_cheese/backup_query.py
 geo_cheese/findloc.py
 geo_cheese/random_ip.py
 geo_cheese/reverse_latlng_google.py
-geo_cheese/update_db.py
 geo_cheese.egg-info/PKG-INFO
 geo_cheese.egg-info/SOURCES.txt
 geo_cheese.egg-info/dependency_links.txt

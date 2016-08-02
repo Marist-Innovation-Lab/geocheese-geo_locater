@@ -8,7 +8,6 @@ import re
 import json
 import urllib2
 import sys
-import update_db
 from unidecode import unidecode
 from BeautifulSoup import BeautifulSoup
 

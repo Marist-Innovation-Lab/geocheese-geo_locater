@@ -4,7 +4,7 @@ import os.path
 import urllib2
 import sys
 
-dir = "./local_dbs/"
+dir = "./"
 
 # Main function to call all others
 def main():
@@ -19,6 +19,7 @@ def main():
         error = sys.exc_info()[0]
         print("Error: " + str(error))
         print("Main function failed, retrying function...")
+        main()
 
 # Get GeoLite2-City.mmdb Hash
 def get_hash():
