@@ -78,7 +78,6 @@ def get_geo_file():
         data = file.read()
         with open(dir + "GeoLite2-City.mmdb.gz", "wb") as code:
             code.write(data)
-
     except:
         error = sys.exc_info()[0]
         print("Error: " + str(error))
@@ -142,9 +141,12 @@ def get_asn_file():
 
         file = urllib2.urlopen('https://raw.githubusercontent.com/hadiasghari/pyasn/master/data/asnames.json')
         data = file.read()
-        with open(dir + "asnames.json", "wb") as code:
+        with open(dir + "asnames-temp.json", "wb") as code:
             code.write(data)
+        shutil.copy(dir + "asnames-temp.json", dir + "asnames.json")
 
+        os.remove(dir + "asnames-temp.json")
+        print("Updating Hash...\n")
     except:
         error = sys.exc_info()[0]
         print("Error: " + str(error))
@@ -184,8 +186,12 @@ def get_ipasn_file():
 
         file = urllib2.urlopen('https://raw.githubusercontent.com/hadiasghari/pyasn/master/data/ipasn_20140513.dat')
         data = file.read()
-        with open(dir + "ipasn_20140513.dat", "wb") as code:
+        with open(dir + "ipasn_20140513-temp.dat", "wb") as code:
             code.write(data)
+        shutil.copy(dir + "ipasn_20140513-temp.dat", dir + "ipasn_20140513.dat")
+
+        os.remove(dir + "ipasn_20140513-temp.dat")
+        print("Updating Hash...\n")
 
     except:
         error = sys.exc_info()[0]
