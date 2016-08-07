@@ -117,7 +117,7 @@ def check_asn_ver():
         # Get online hash for ASN Database
         on_ver = urllib2.Request('https://github.com/hadiasghari/pyasn/blob/master/data/asnames.json')
         on_ver_num = urllib2.urlopen(on_ver).read().replace("\n","")
-        on_ver_num = re.findall('<a class="commit-tease-sha"\s.*>(.*)\s</a>', on_ver_num)
+        on_ver_num = re.findall('<a class="commit-tease-sha"\s.*x>\s+(\w+)\s+</a>', on_ver_num)
         on_ver_num = on_ver_num[0].strip()
         print("Online Hash: " + on_ver_num + "\n")
 
@@ -161,8 +161,8 @@ def check_ipasn_ver():
 
         # Get online hash for ASN Database
         on_ver = urllib2.Request('https://github.com/hadiasghari/pyasn/blob/master/data/ipasn_20140513.dat')
-        on_ver_num = urllib2.urlopen(on_ver).read()#.replace("\n","")
-        on_ver_num = re.findall('<a class="commit-tease-sha"\s.*x>\s(.*)', on_ver_num)
+        on_ver_num = urllib2.urlopen(on_ver).read().replace("\n", "")
+        on_ver_num = re.findall('<a class="commit-tease-sha"\s.*x>\s+(\w+)\s+</a>', on_ver_num)
         on_ver_num = on_ver_num[0].strip()
         print("Online Hash: " + on_ver_num + "\n")
 

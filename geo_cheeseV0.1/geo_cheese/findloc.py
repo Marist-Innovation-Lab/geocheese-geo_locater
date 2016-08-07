@@ -8,8 +8,24 @@ import re
 import json
 import urllib2
 import sys
+import os.path
+import update_db
 from unidecode import unidecode
 from BeautifulSoup import BeautifulSoup
+
+# Check if database exists, if not download database from MaxMind
+def check_db():
+    if os.path.isfile("./GeoLite2-City.mmdb"):
+        return True
+    else:
+        try:
+            print("GeoLite2-City.mmdb is missing, attempting to acquire file...\n")
+            update_db.get_geo_file()
+            check_db()
+        except:
+            error = sys.exc_info()[0]
+            print("Error: " + str(error))
+            print("Failed to acquire GeoLite2-City.mmdb...\n")
 
 # For filtering string of unicode, and prepare for printing
 def to_string(word):
