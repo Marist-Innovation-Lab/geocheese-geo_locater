@@ -51,6 +51,7 @@ def main():
 # Get GeoLite2-City.mmdb Hash
 def get_geo_hash():
     try:
+        print("Checking GeoLite2-City.mmdb...")
         current_hash = open(hash_dir + 'GeoLite2-City.mmdb md5 Hash.txt').read()
         print("Current Hash: " + current_hash)
         online_hash = urllib2.urlopen('http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.md5').read()
@@ -110,6 +111,7 @@ def extract_geo_file():
 # Get asnames.json hash from GitHub
 def check_asn_ver():
     try:
+        print("Checking asnames.json...")
         # Get hash for current version of the ASN Database
         cur_ver_num = open(hash_dir + "asnames.json Hash.txt").read()
         print("Current Hash: " + cur_ver_num)
@@ -155,6 +157,7 @@ def get_asn_file():
 # Get ipasn_20140513.dat hash from GitHub
 def check_ipasn_ver():
     try:
+        print("Checking ipasn_20140513.dat...")
         # Get hash for current version of the IPASN Database
         cur_ver_num = open(hash_dir + "ipasn_20140513.dat Hash.txt").read()
         print("Current Hash: " + cur_ver_num)
