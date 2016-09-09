@@ -201,4 +201,4 @@ def get_ipasn_file():
         print("Error: " + str(error))
         print("Failed to retrieve ipasn_20140513.dat...")
 
-main()
+#main()
