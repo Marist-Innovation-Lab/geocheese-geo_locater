@@ -39,7 +39,7 @@ def remove_tags(text):
     return ''.join(xml.etree.ElementTree.fromstring(text).itertext())
 
 # Main function to retrieve GeoISP data about target IP address
-def find_loc(mmdb_file, my_ip):
+def find_loc(mmdb_file, isp_mmdb_file, my_ip):
 
     # Declare GeoLocation Variables
     country = None
@@ -123,30 +123,58 @@ def find_loc(mmdb_file, my_ip):
     # Get's ISP Information
     try:
         print("Retrieving ISP Data...")
-        isp_data2 = urllib2.Request('http://whatismyipaddress.com/ip/' + my_ip, headers={'User-Agent': 'Mozilla/5.0'})
-        clean_isp_data2 = urllib2.urlopen(isp_data2).read()
-        clean_isp_data2 = BeautifulSoup(clean_isp_data2).text
-        #print(clean_isp_data2)
+        isp_reader = geoip2.database.Reader(isp_mmdb_file)
+        isp_response = isp_reader.isp(my_ip)
 
-        isp_name = re.findall('ISP:(.*)Organization:', clean_isp_data2)
-        isp_host = re.findall('Hostname:(.*)ASN:', clean_isp_data2)
-        isp_asn = re.findall('ASN:(\d+)ISP:', clean_isp_data2)
-        isp_ip = re.findall('FALSEIP:(\d+.\d+.\d+.\d+)Decimal', clean_isp_data2)
+        # Declares ISP_ASN as an array for formatting sake later on. (Adding to Dictionary)
+        isp_asn = []
+
+        isp_asn.append(isp_response.autonomous_system_number)
+        isp_name = isp_response.organization
+        isp_host = isp_response.isp
+        isp_ip = isp_response.ip_address
 
         if isp_name:
-            print("isp_name acquired from WhatIsMyIPAddress...")
+            print("isp_name acquired from MAxMind GeoIP2-ISP.mmdb...")
         if isp_host:
-            print("isp_host acquired from WhatIsMyIPAddress...")
+            print("isp_host acquired from MAxMind GeoIP2-ISP.mmdb...")
         if isp_asn:
-            print("isp_asn acquired from WhatIsMyIPAddress...")
+            print("isp_asn acquired from MAxMind GeoIP2-ISP.mmdb...")
         if isp_ip:
-            print("isp_ip acquired from WhatIsMyIPAddress...")
+            print("isp_ip acquired from MAxMind GeoIP2-ISP.mmdb...")
 
-        print("Successfully retrieved ISP data from WhatIsMyIPAddress...\n")
+        print("Successfully retrieved ISP data from MAxMind GeoIP2-ISP.mmdb...\n")
     except:
         error = sys.exc_info()[0]
         print("Error: " + str(error))
-        print("Failure to open WhatIsMyIPAddress or connection rejected...\n")
+
+    if not isp_ip or not isp_host or not isp_name or not isp_asn:
+        try:
+            print("Some ISP data is missing, running backup query...")
+            isp_data2 = urllib2.Request('http://whatismyipaddress.com/ip/' + my_ip, headers={'User-Agent': 'Mozilla/5.0'})
+            clean_isp_data2 = urllib2.urlopen(isp_data2).read()
+            clean_isp_data2 = BeautifulSoup(clean_isp_data2).text
+            #print(clean_isp_data2)
+
+            isp_name = re.findall('ISP:(.*)Organization:', clean_isp_data2)
+            isp_host = re.findall('Hostname:(.*)ASN:', clean_isp_data2)
+            isp_asn = re.findall('ASN:(\d+)ISP:', clean_isp_data2)
+            isp_ip = re.findall('FALSEIP:(\d+.\d+.\d+.\d+)Decimal', clean_isp_data2)
+
+            if isp_name:
+                print("isp_name acquired from WhatIsMyIPAddress...")
+            if isp_host:
+                print("isp_host acquired from WhatIsMyIPAddress...")
+            if isp_asn:
+                print("isp_asn acquired from WhatIsMyIPAddress...")
+            if isp_ip:
+                print("isp_ip acquired from WhatIsMyIPAddress...")
+
+            print("Successfully retrieved ISP data from WhatIsMyIPAddress...\n")
+        except:
+            error = sys.exc_info()[0]
+            print("Error: " + str(error))
+            print("Failure to open WhatIsMyIPAddress or connection rejected...\n")
 
     # Backup Query in case data is still missing
     if not isp_ip or not isp_host or not isp_name or not isp_asn:
@@ -382,6 +410,6 @@ def find_loc(mmdb_file, my_ip):
 #    print(x + 1)
 #    find_loc("local_dbs/GeoLite2-City.mmdb", random_ip.rand_ip())
 #find_loc("local_dbs/GeoLite2-City.mmdb", '243.63.89.86') # Invalid IP for Testing
-#find_loc("local_dbs/GeoLite2-City.mmdb", "91.236.75.4")
+#find_loc("local_dbs/GeoLite2-City.mmdb", "local_dbs/GeoIP2-ISP.mmdb", "91.236.75.4")
 #find_loc("local_dbs/GeoLite2-City.mmdb", random_ip.rand_ip())
 #get_asn("166.193.75.232")
