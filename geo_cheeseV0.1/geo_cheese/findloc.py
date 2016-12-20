@@ -50,10 +50,10 @@ def find_loc(mmdb_file, isp_mmdb_file, my_ip):
     long = None
 
     # Declare ISP Variables
-    isp_asn = None
-    isp_name = None
-    isp_host = None
-    isp_ip = None
+    isp_asn = []
+    isp_name = []
+    isp_host = []
+    isp_ip = []
 
     print("Target IP: " + my_ip)
     try:
@@ -126,13 +126,10 @@ def find_loc(mmdb_file, isp_mmdb_file, my_ip):
         isp_reader = geoip2.database.Reader(isp_mmdb_file)
         isp_response = isp_reader.isp(my_ip)
 
-        # Declares ISP_ASN as an array for formatting sake later on. (Adding to Dictionary)
-        isp_asn = []
-
         isp_asn.append(isp_response.autonomous_system_number)
-        isp_name = isp_response.organization
-        isp_host = isp_response.isp
-        isp_ip = isp_response.ip_address
+        isp_name.append(isp_response.organization)
+        isp_host.append(isp_response.isp)
+        isp_ip.append(isp_response.ip_address)
 
         if isp_name:
             print("isp_name acquired from MAxMind GeoIP2-ISP.mmdb...")
@@ -410,6 +407,7 @@ def find_loc(mmdb_file, isp_mmdb_file, my_ip):
 #    print(x + 1)
 #    find_loc("local_dbs/GeoLite2-City.mmdb", random_ip.rand_ip())
 #find_loc("local_dbs/GeoLite2-City.mmdb", '243.63.89.86') # Invalid IP for Testing
+#find_loc("local_dbs/GeoLite2-City.mmdb", "local_dbs/GeoIP2-ISP.mmdb", "189.14.172.211")
 #find_loc("local_dbs/GeoLite2-City.mmdb", "local_dbs/GeoIP2-ISP.mmdb", "91.236.75.4")
 #find_loc("local_dbs/GeoLite2-City.mmdb", random_ip.rand_ip())
 #get_asn("166.193.75.232")
