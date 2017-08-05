@@ -6,7 +6,7 @@ import geoip2.database
 import geocoder
 import re
 import json
-import urllib2
+import urllib3
 import sys
 import os.path
 import update_db
@@ -132,20 +132,21 @@ def find_loc(mmdb_file, isp_mmdb_file, my_ip):
         isp_ip.append(isp_response.ip_address)
 
         if isp_name:
-            print("isp_name acquired from MAxMind GeoIP2-ISP.mmdb...")
+            print("isp_name acquired from MaxMind GeoIP2-ISP.mmdb...")
         if isp_host:
-            print("isp_host acquired from MAxMind GeoIP2-ISP.mmdb...")
+            print("isp_host acquired from MaxMind GeoIP2-ISP.mmdb...")
         if isp_asn:
-            print("isp_asn acquired from MAxMind GeoIP2-ISP.mmdb...")
+            print("isp_asn acquired from MaxMind GeoIP2-ISP.mmdb...")
         if isp_ip:
-            print("isp_ip acquired from MAxMind GeoIP2-ISP.mmdb...")
+            print("isp_ip acquired from MaxMind GeoIP2-ISP.mmdb...")
 
         print("Successfully retrieved ISP data from MAxMind GeoIP2-ISP.mmdb...\n")
     except:
         error = sys.exc_info()[0]
         print("Error: " + str(error))
 
-    if not isp_ip or not isp_host or not isp_name or not isp_asn:
+    # DEPRECATED
+    '''if not isp_ip or not isp_host or not isp_name or not isp_asn:
         try:
             print("Some ISP data is missing, running backup query...")
             isp_data2 = urllib2.Request('http://whatismyipaddress.com/ip/' + my_ip, headers={'User-Agent': 'Mozilla/5.0'})
@@ -171,7 +172,7 @@ def find_loc(mmdb_file, isp_mmdb_file, my_ip):
         except:
             error = sys.exc_info()[0]
             print("Error: " + str(error))
-            print("Failure to open WhatIsMyIPAddress or connection rejected...\n")
+            print("Failure to open WhatIsMyIPAddress or connection rejected...\n")'''
 
     # Backup Query in case data is still missing
     if not isp_ip or not isp_host or not isp_name or not isp_asn:
@@ -218,7 +219,10 @@ def find_loc(mmdb_file, isp_mmdb_file, my_ip):
     if not subdivision or not city or not zip or not isp_asn or not isp_name or not isp_host or not isp_ip:
         try:
             print("Some GeoISP data is missing, retrieving information from api.moocher.io...")
-            isp_data4 = urllib2.urlopen('http://api.moocher.io/ip/' + str(my_ip)).read()
+            http = urllib3.PoolManager()
+            url = 'http://api.moocher.io/ip/' + str(my_ip)
+            response = http.request('GET', url)
+            isp_data4 = response.data
             isp_data4_json = json.loads(isp_data4)
 
             # Retrieve Geo Data from api.moocher.io
@@ -273,7 +277,10 @@ def find_loc(mmdb_file, isp_mmdb_file, my_ip):
     if not isp_name or not isp_host or not isp_asn or not isp_ip:
         try:
             print("Some ISP data is missing, retrieving information from ipinfo.io...")
-            isp_data3 = urllib2.urlopen('http://ipinfo.io/' + str(my_ip) + '/json').read()
+            http = urllib3.PoolManager()
+            url = 'http://ipinfo.io/' + str(my_ip) + '/json'
+            response = http.request('GET', url)
+            isp_data3 = response.data
             isp_data3_json = json.loads(isp_data3)
 
             if not isp_host:
@@ -305,7 +312,10 @@ def find_loc(mmdb_file, isp_mmdb_file, my_ip):
     if not isp_name or not isp_asn or not isp_ip:
         try:
             print("Some ISP data is missing, retrieving information from ip-api.com...")
-            isp_data2 = urllib2.urlopen('http://ip-api.com/json/' + my_ip).read()
+            http = urllib3.PoolManager()
+            url = 'http://ip-api.com/json/' + str(my_ip)
+            response = http.request('GET', url)
+            isp_data2 = response.data
             isp_json = json.loads(isp_data2)
             #print(isp_json)
 
@@ -409,5 +419,6 @@ def find_loc(mmdb_file, isp_mmdb_file, my_ip):
 #find_loc("local_dbs/GeoLite2-City.mmdb", '243.63.89.86') # Invalid IP for Testing
 #find_loc("local_dbs/GeoLite2-City.mmdb", "local_dbs/GeoIP2-ISP.mmdb", "189.14.172.211")
 #find_loc("local_dbs/GeoLite2-City.mmdb", "local_dbs/GeoIP2-ISP.mmdb", "91.236.75.4")
-#find_loc("local_dbs/GeoLite2-City.mmdb", random_ip.rand_ip())
+#find_loc("local_dbs/GeoLite2-City.mmdb", "local_dbs/GeoIP2-ISP.mmdb", "40.75.116.161")
+#find_loc("local_dbs/GeoLite2-City.mmdb", "local_dbs/GeoIP2-ISP.mmdb", random_ip.rand_ip())
 #get_asn("166.193.75.232")

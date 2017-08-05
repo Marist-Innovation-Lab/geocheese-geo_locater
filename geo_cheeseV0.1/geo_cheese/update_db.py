@@ -1,7 +1,7 @@
 import gzip
 import glob
 import os.path
-import urllib2
+import urllib3
 import sys
 import shutil
 import re
@@ -36,7 +36,8 @@ def main():
         print("Main function failed, retrying function...")
         main()
 
-    try:
+    # DEPRECATED
+    '''try:
         if check_ipasn_ver():
             get_ipasn_file()
             print("Successfully acquired latest version of ipasn_20140513.dat...\n")
@@ -46,15 +47,21 @@ def main():
         error = sys.exc_info()[0]
         print("Error: " + str(error))
         print("Main function failed, retrying function...")
-        main()
+        main()'''
 
 # Get GeoLite2-City.mmdb Hash
 def get_geo_hash():
     try:
+        # Reading Stored Database Hash
         print("Checking GeoLite2-City.mmdb...")
         current_hash = open(hash_dir + 'GeoLite2-City.mmdb md5 Hash.txt').read()
         print("Current Hash: " + current_hash)
-        online_hash = urllib2.urlopen('http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.md5').read()
+
+        # Retrieving Online Database Hash
+        http = urllib3.PoolManager()
+        url = 'http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.md5'
+        response = http.request('GET', url)
+        online_hash = response.data
         print("Online Hash: " + online_hash + "\n")
 
         if current_hash == online_hash:
@@ -74,11 +81,18 @@ def get_geo_hash():
 def get_geo_file():
     try:
         print("Downloading new GeoLite2-City.mmdb.gz...")
-
-        file = urllib2.urlopen('http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz')
-        data = file.read()
-        with open(dir + "GeoLite2-City.mmdb.gz", "wb") as code:
-            code.write(data)
+        http = urllib3.PoolManager()
+        url = 'http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz'
+        r = http.request('GET', url, preload_content=False)
+        with open(dir + "GeoLite2-City.mmdb.gz", 'wb') as out:
+            while True:
+                print("Writing GeoLite2-City.mmdb.gz file...")
+                data = r.read()
+                if not data:
+                    break
+                out.write(data)
+        r.release_conn()
+        print("Finished downloading new GeoLite2-City.mmdb.gz...")
     except:
         error = sys.exc_info()[0]
         print("Error: " + str(error))
@@ -117,8 +131,10 @@ def check_asn_ver():
         print("Current Hash: " + cur_ver_num)
 
         # Get online hash for ASN Database
-        on_ver = urllib2.Request('https://github.com/hadiasghari/pyasn/blob/master/data/asnames.json')
-        on_ver_num = urllib2.urlopen(on_ver).read().replace("\n","")
+        http = urllib3.PoolManager()
+        url = 'https://github.com/hadiasghari/pyasn/blob/master/data/asnames.json'
+        response = http.request('GET', url)
+        on_ver_num = response.data
         on_ver_num = re.findall('<a class="commit-tease-sha"\s.*x>\s+(\w+)\s+</a>', on_ver_num)
         on_ver_num = on_ver_num[0].strip()
         print("Online Hash: " + on_ver_num + "\n")
@@ -140,13 +156,19 @@ def check_asn_ver():
 def get_asn_file():
     try:
         print("Downloading new asnames.json...")
-
-        file = urllib2.urlopen('https://raw.githubusercontent.com/hadiasghari/pyasn/master/data/asnames.json')
-        data = file.read()
-        with open(dir + "asnames-temp.json", "wb") as code:
-            code.write(data)
+        http = urllib3.PoolManager()
+        url = 'https://raw.githubusercontent.com/hadiasghari/pyasn/master/data/asnames.json'
+        r = http.request('GET', url, preload_content=False)
+        with open(dir + "asnames-temp.json", 'wb') as out:
+            while True:
+                print("Writing new asnames.json...")
+                data = r.read()
+                if not data:
+                    break
+                out.write(data)
+        r.release_conn()
+        print("Finished downloading new asnames.json...")
         shutil.copy(dir + "asnames-temp.json", dir + "asnames.json")
-
         os.remove(dir + "asnames-temp.json")
         print("Updating Hash...\n")
     except:
@@ -154,8 +176,8 @@ def get_asn_file():
         print("Error: " + str(error))
         print("Failed to retrieve asnames.json...")
 
-# Get ipasn_20140513.dat hash from GitHub
-def check_ipasn_ver():
+# Get ipasn_20140513.dat hash from GitHub - DEPRECATED
+'''def check_ipasn_ver():
     try:
         print("Checking ipasn_20140513.dat...")
         # Get hash for current version of the IPASN Database
@@ -199,6 +221,6 @@ def get_ipasn_file():
     except:
         error = sys.exc_info()[0]
         print("Error: " + str(error))
-        print("Failed to retrieve ipasn_20140513.dat...")
+        print("Failed to retrieve ipasn_20140513.dat...")'''
 
-main()
+#main()

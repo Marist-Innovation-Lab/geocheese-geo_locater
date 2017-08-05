@@ -1,5 +1,5 @@
 import json
-import urllib2
+import urllib3
 from unidecode import unidecode
 
 # For filtering string of unicode, and prepare for printing
@@ -15,7 +15,10 @@ def backup_latlng(lat, long):
     google_postal = None
     google_sublocality = None
     try:
-        rev_latlng = urllib2.urlopen('http://maps.googleapis.com/maps/api/geocode/json?latlng=' + str(lat) + ',' + str(long) + '&sensor=true').read()
+        http = urllib3.PoolManager()
+        url = 'http://maps.googleapis.com/maps/api/geocode/json?latlng=' + str(lat) + ',' + str(long) + '&sensor=true';
+        response = http.request('GET', url)
+        rev_latlng = response.data
         latlng_json = json.loads(rev_latlng)
 
         city_found = False
@@ -81,5 +84,5 @@ def backup_latlng(lat, long):
         print("Error occured opening URL, trying again...")
         backup_latlng(lat, long)
 
-#backup_latlng('30.0355', '31.223')
+#print(backup_latlng('30.0355', '31.223'))
 #backup_latlng('41.7038','-73.9218')

@@ -1,8 +1,7 @@
 import re
 import xml
-import urllib2
+import urllib3
 import json
-import pyasn
 from unidecode import unidecode
 from BeautifulSoup import BeautifulSoup
 from pprint import pprint
@@ -15,15 +14,17 @@ def to_string(word):
         return str(word)
 
 def query_(my_ip):
-    #my_ip = urllib2.urlopen('http://ip.42.pl/raw').read()
     try:
-        isp_data = urllib2.urlopen('https://www.whoismyisp.org/ip/' + my_ip).read()
+        http = urllib3.PoolManager()
+        url = 'https://www.whoismyisp.org/ip/' + my_ip
+        response = http.request('GET', url)
+        isp_data = response.data
         clean_isp_data = BeautifulSoup(isp_data).text
         # print(clean_isp_data)
 
         isp_name = re.findall('Who\sis\smy\sISP\?(.*)The\sInternet\s', clean_isp_data)
         isp_host = re.findall('this\sIP\sis\'(.*)\'\.Other', clean_isp_data)
-        isp_ip = re.findall('IP\saddress\sis(\d+.\d+.\d+.\d+).\sThis', clean_isp_data)
+        isp_ip = re.findall('IP\saddress\sis(\d+.\d+.\d+.\d+)\.\s', clean_isp_data)
 
         if not isp_name:
             isp_name = None
@@ -38,7 +39,6 @@ def query_(my_ip):
             'ip': isp_ip[0]
         }
 
-        #print(isp_info2)
     except:
         isp_info2 = {
             'name': None,
@@ -54,11 +54,11 @@ def get_asn(my_ip):
     try:
         # Initialize module and load IP to ASN database
         # the sample database can be downloaded or built - see below
-        asndb = pyasn.pyasn('local_dbs/ipasn_20140513.dat')
+        with open('local_dbs/ipasn.json') as asn_db:
+            ip_asn = json.load(asn_db)
         with open('local_dbs/asnames.json') as asn_host:
             asn_name = json.load(asn_host)
-
-        isp_asn = asndb.lookup(my_ip)[0]
+        isp_asn = ip_asn[str(my_ip)]
         isp_name = asn_name[str(isp_asn)]
 
         if not isp_asn:
@@ -71,7 +71,6 @@ def get_asn(my_ip):
             'isp_name': isp_name
         }
 
-        #print(isp_info)
     except:
         print("IP Address is not in local ASN Database...")
         isp_info = {
@@ -81,5 +80,5 @@ def get_asn(my_ip):
 
     return isp_info
 
-#query_("166.193.75.232")
-#get_asn("90.37.92.95")
+#print(query_("166.193.75.232"))
+#print(get_asn("159.66.242.0"))
