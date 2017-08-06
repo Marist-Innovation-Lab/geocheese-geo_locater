@@ -19,6 +19,7 @@
     * from geo_cheese import find_loc
     * Example Usage: find_loc("local_dbs/GeoLite2-City.mmdb", "local_dbs/GeoIP2-ISP.mmdb", "40.75.116.161")
     * Generic Usage: find_loc(<Location of GeoLite2-City File>, <Location of GeoIP2-ISP File>, <IP Address>)
+    * find_loc takes in the 3 parameters (2 file locations and 1 ip address) and returns the GeoISP results as a python dictionary (similar to JSON)
 
 
  `````````````````````````````````````````````````````````          `````````````````````````````````
